@@ -1,0 +1,7 @@
+## Ansible Hosts File
+
+[k8s-test-masters]
+drmaster01 ansible_host=45.119.83.34
+
+[k8s-production-masters]
+dcmaster01 ansible_host=45.119.83.34

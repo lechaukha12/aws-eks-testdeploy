@@ -1,0 +1,11 @@
+apiVersion: v1 
+kind: Service
+metadata:
+  name: {{ k8s_app_name }}
+  namespace: {{ k8s_namespace }}
+spec:
+  selector:
+    app: {{ k8s_app_name }}
+  ports:
+  - port: {{ k8s_container_port }}
+    targetPort: {{ k8s_container_port }}

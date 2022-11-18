@@ -1,0 +1,15 @@
+- hosts: "{{ target_hosts }}"
+  gather_facts: false
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+    k8s_env: "{{ lookup('env','ENV') }}"
+    k8s_namespace: "{{ lookup('env','K8S_NAMESPACE') }}"
+    k8s_app_name: "{{ lookup('env','K8S_APP_NAME') }}"
+  tasks:
+    - name: delete deployment with manifests
+      shell: kubectl --kubeconfig=/tmp/k8s-{{ k8s_app_name }}-deployment/kubeconfig-{{ k8s_env }} -n {{ k8s_namespace }} delete -f /tmp/k8s-{{ k8s_app_name }}-deployment/manifests/
+
+    - name: clean up hosts
+      file:
+        path: "/tmp/k8s-{{ k8s_app_name }}-deployment"
+        state: absent

@@ -1,0 +1,13 @@
+FROM node:14-alpine
+RUN apk -U upgrade
+RUN apk --no-cache add git supervisor gcc g++ make autoconf automake libtool zlib zlib-dev
+
+WORKDIR /var/www/html
+RUN addgroup --gid 1001 appgrp && adduser --uid 1001 --ingroup appgrp --disabled-password --gecos "" appuser && chown -R appuser:appgrp /var/www/html
+USER appuser
+
+RUN git -c http.sslVerify=false clone --depth=1 --branch master -v https://ngoctiennguyen155:nguyenngoctien155@gitlab.com/ngoctiennguyen155/test-deploy-k8s.git .
+ENV NODE_ENV=production
+RUN npm install
+
+CMD ["npm", "start"]

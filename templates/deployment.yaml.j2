@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ k8s_app_name }}
+  namespace: {{ k8s_namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ k8s_app_name }}
+  template:
+    metadata:
+      labels:
+        app: {{ k8s_app_name }}
+    spec:
+      imagePullSecrets:
+      - name: {{ k8s_pull_secret }}
+      containers:
+      - name: {{ k8s_app_name }}
+        image: {{ k8s_image_name }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ k8s_container_port }}
+        envFrom:
+        - secretRef:
+            name: {{ k8s_app_name }}-secret

@@ -1,0 +1,42 @@
+- hosts: "{{ target_hosts }}"
+  gather_facts: false
+  vars:
+    date: "{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+    k8s_env: "{{ lookup('env','ENV') }}"
+    k8s_namespace: "{{ lookup('env','K8S_NAMESPACE') }}"
+    k8s_image_name: "{{ lookup('env','IMAGE_NAME') }}"
+    k8s_pull_secret: "{{ lookup('env','K8S_REG_SECRET') }}"
+    k8s_app_name: "{{ lookup('env','K8S_APP_NAME') }}"
+    k8s_ingress_context: "{{ lookup('env','K8S_APP_CONTEXT') }}"
+    k8s_container_port: "{{ lookup('env','K8S_CONTAINER_PORT') }}"
+  tasks:
+    - name: create directory for deployment
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "/tmp/k8s-{{ k8s_app_name }}-deployment/files"
+        - "/tmp/k8s-{{ k8s_app_name }}-deployment/manifests"
+
+    - name: copy additional files to servers
+      copy:
+        src: "files/{{ k8s_env }}/"
+        dest: /tmp/k8s-{{ k8s_app_name }}-deployment/files/
+
+    - name: copy kubeconfig to servers
+      copy:
+        src: "kubeconfig-{{ k8s_env }}"
+        dest: "/tmp/k8s-{{ k8s_app_name }}-deployment/"
+
+    - name: generate deployment manifests
+      template:
+        src: "{{ item }}"
+        dest: /tmp/k8s-{{ k8s_app_name }}-deployment/manifests/{{ item | basename | regex_replace('\.j2$', '') }}
+      with_fileglob: "templates/*.j2"
+
+    - name: generate config manifests
+      template:
+        src: "{{ item }}"
+        dest: /tmp/k8s-{{ k8s_app_name }}-deployment/manifests/{{ item | basename | regex_replace('\.j2$', '') }}
+      with_fileglob: "templates/{{ k8s_env }}/*.j2"
